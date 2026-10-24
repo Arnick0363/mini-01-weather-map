@@ -1,0 +1,21 @@
+# ---- 虚拟环境 ----
+venv/
+.venv/
+env/
+
+# ---- API Key 与敏感配置（Q3 红线：绝不提交）----
+.env
+
+# ---- Python 运行产物 ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+
+# ---- IDE / 编辑器 ----
+.vscode/
+.idea/
+
+# ---- 系统文件 ----
+Thumbs.db
+.DS_Store

@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_f92cabb2364b942c5911bc20267e4abd {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.1.0/leaflet.markercluster.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.1.0/MarkerCluster.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.1.0/MarkerCluster.Default.css"/>
+</head>
+<body>
+    
+    
+            <div class="folium-map" id="map_f92cabb2364b942c5911bc20267e4abd" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_f92cabb2364b942c5911bc20267e4abd = L.map(
+                "map_f92cabb2364b942c5911bc20267e4abd",
+                {
+                    center: [22.9, 113.5],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 8,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_098e09ef1dd1c69e642a369455c7bd35 = L.tileLayer(
+                "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+                {
+  "minZoom": 0,
+  "maxZoom": 18,
+  "maxNativeZoom": 18,
+  "noWrap": false,
+  "attribution": "Esri",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_098e09ef1dd1c69e642a369455c7bd35.addTo(map_f92cabb2364b942c5911bc20267e4abd);
+        
+    
+            var tile_layer_ec436ba5da5b8eaab20f9ac4f9eb4844 = L.tileLayer(
+                "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                {
+  "minZoom": 0,
+  "maxZoom": 18,
+  "maxNativeZoom": 18,
+  "noWrap": false,
+  "attribution": "Tiles \u0026copy; Esri \u0026mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            var layer_control_b52395c9004b9743a5b8636bef41ddea_layers = {
+                base_layers : {
+                    "esriworldstreetmap" : tile_layer_098e09ef1dd1c69e642a369455c7bd35,
+                    "\u536b\u661f\u5f71\u50cf" : tile_layer_ec436ba5da5b8eaab20f9ac4f9eb4844,
+                },
+                overlays :  {
+                    "\u57ce\u5e02\u7ad9\u70b9" : marker_cluster_6eb1a9cc0a420db1219e9a970b822eca,
+                },
+            };
+            let layer_control_b52395c9004b9743a5b8636bef41ddea = L.control.layers(
+                layer_control_b52395c9004b9743a5b8636bef41ddea_layers.base_layers,
+                layer_control_b52395c9004b9743a5b8636bef41ddea_layers.overlays,
+                {
+  "position": "topright",
+  "collapsed": false,
+  "autoZIndex": true,
+}
+            ).addTo(map_f92cabb2364b942c5911bc20267e4abd);
+
+        
+    
+            var marker_cluster_6eb1a9cc0a420db1219e9a970b822eca = L.markerClusterGroup(
+                {
+}
+            );
+        
+    
+            var marker_7b5129d04b8d078ae51c57731dc7a271 = L.marker(
+                [23.1167, 113.25],
+                {
+}
+            ).addTo(marker_cluster_6eb1a9cc0a420db1219e9a970b822eca);
+        
+    
+            var icon_8f48be0d54560f7ca49e1169ac8a3d30 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "white",
+  "iconColor": "#F4A582",
+  "icon": "thermometer-half",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_5f6168ba4a58b0b2bfce99d1b3fa4677 = L.popup({
+  "maxWidth": 260,
+});
+
+        
+            
+                var html_f3e772b075be5943e9db760195b67bff = $(`<div id="html_f3e772b075be5943e9db760195b67bff" style="width: 100.0%; height: 100.0%;"><div style='font-family: sans-serif; min-width: 160px;'><h4 style='margin:0 0 4px;'>广州</h4><b>温度：</b>24.5°C（体感 24.6°C）<br><b>湿度：</b>61%<br><b>风速：</b>3.84 m/s<br><b>天气：</b>多云<br><span style='color:#888;font-size:12px;'>更新于 2026-10-25 01:27:15.572855</span></div></div>`)[0];
+                popup_5f6168ba4a58b0b2bfce99d1b3fa4677.setContent(html_f3e772b075be5943e9db760195b67bff);
+            
+        
+
+        marker_7b5129d04b8d078ae51c57731dc7a271.bindPopup(popup_5f6168ba4a58b0b2bfce99d1b3fa4677)
+        ;
+
+        
+    
+    
+            marker_7b5129d04b8d078ae51c57731dc7a271.bindTooltip(
+                `<div>
+                     广州 24.5°C
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_7b5129d04b8d078ae51c57731dc7a271.setIcon(icon_8f48be0d54560f7ca49e1169ac8a3d30);
+            
+    
+            var marker_080cd3fed88f277b96c840e2b7177a0c = L.marker(
+                [23.0268, 113.1315],
+                {
+}
+            ).addTo(marker_cluster_6eb1a9cc0a420db1219e9a970b822eca);
+        
+    
+            var icon_45c72fdb5b04122a6cd829a8b1fe555b = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "white",
+  "iconColor": "#F4A582",
+  "icon": "thermometer-half",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_51e1edcd0a4d92c2c9018e7992ec46f4 = L.popup({
+  "maxWidth": 260,
+});
+
+        
+            
+                var html_d6f8cad37576d109a0b62d1783cfb2c0 = $(`<div id="html_d6f8cad37576d109a0b62d1783cfb2c0" style="width: 100.0%; height: 100.0%;"><div style='font-family: sans-serif; min-width: 160px;'><h4 style='margin:0 0 4px;'>佛山</h4><b>温度：</b>24.3°C（体感 24.3°C）<br><b>湿度：</b>60%<br><b>风速：</b>3.89 m/s<br><b>天气：</b>多云<br><span style='color:#888;font-size:12px;'>更新于 2026-10-25 01:27:17.834640</span></div></div>`)[0];
+                popup_51e1edcd0a4d92c2c9018e7992ec46f4.setContent(html_d6f8cad37576d109a0b62d1783cfb2c0);
+            
+        
+
+        marker_080cd3fed88f277b96c840e2b7177a0c.bindPopup(popup_51e1edcd0a4d92c2c9018e7992ec46f4)
+        ;
+
+        
+    
+    
+            marker_080cd3fed88f277b96c840e2b7177a0c.bindTooltip(
+                `<div>
+                     佛山 24.3°C
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_080cd3fed88f277b96c840e2b7177a0c.setIcon(icon_45c72fdb5b04122a6cd829a8b1fe555b);
+            
+    
+            var marker_9294eaeaa3f8e4b910aba50ec4280936 = L.marker(
+                [23.0489, 113.7447],
+                {
+}
+            ).addTo(marker_cluster_6eb1a9cc0a420db1219e9a970b822eca);
+        
+    
+            var icon_38c33e3da718466535904f2e6dd076c6 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "white",
+  "iconColor": "#F4A582",
+  "icon": "thermometer-half",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_3d11762c43382cd41d9cd6231ff77fc3 = L.popup({
+  "maxWidth": 260,
+});
+
+        
+            
+                var html_63ae92479285dad3165e805d930b242a = $(`<div id="html_63ae92479285dad3165e805d930b242a" style="width: 100.0%; height: 100.0%;"><div style='font-family: sans-serif; min-width: 160px;'><h4 style='margin:0 0 4px;'>东莞</h4><b>温度：</b>25.3°C（体感 25.6°C）<br><b>湿度：</b>64%<br><b>风速：</b>2.09 m/s<br><b>天气：</b>阴，多云<br><span style='color:#888;font-size:12px;'>更新于 2026-10-25 01:27:19.977982</span></div></div>`)[0];
+                popup_3d11762c43382cd41d9cd6231ff77fc3.setContent(html_63ae92479285dad3165e805d930b242a);
+            
+        
+
+        marker_9294eaeaa3f8e4b910aba50ec4280936.bindPopup(popup_3d11762c43382cd41d9cd6231ff77fc3)
+        ;
+
+        
+    
+    
+            marker_9294eaeaa3f8e4b910aba50ec4280936.bindTooltip(
+                `<div>
+                     东莞 25.3°C
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_9294eaeaa3f8e4b910aba50ec4280936.setIcon(icon_38c33e3da718466535904f2e6dd076c6);
+            
+    
+            var marker_e352c4a9b5c882ef6e8495bc9b96012e = L.marker(
+                [22.5455, 114.0683],
+                {
+}
+            ).addTo(marker_cluster_6eb1a9cc0a420db1219e9a970b822eca);
+        
+    
+            var icon_78a7a38652eb5d866f2c486f3618fdc2 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "white",
+  "iconColor": "#F4A582",
+  "icon": "thermometer-half",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_0c4728a8ae781d0b462f82ee7264f31b = L.popup({
+  "maxWidth": 260,
+});
+
+        
+            
+                var html_e819b283191f1f8421c1e03c9ab680f0 = $(`<div id="html_e819b283191f1f8421c1e03c9ab680f0" style="width: 100.0%; height: 100.0%;"><div style='font-family: sans-serif; min-width: 160px;'><h4 style='margin:0 0 4px;'>深圳</h4><b>温度：</b>25.6°C（体感 26.0°C）<br><b>湿度：</b>69%<br><b>风速：</b>2.85 m/s<br><b>天气：</b>多云<br><span style='color:#888;font-size:12px;'>更新于 2026-10-25 01:27:23.925077</span></div></div>`)[0];
+                popup_0c4728a8ae781d0b462f82ee7264f31b.setContent(html_e819b283191f1f8421c1e03c9ab680f0);
+            
+        
+
+        marker_e352c4a9b5c882ef6e8495bc9b96012e.bindPopup(popup_0c4728a8ae781d0b462f82ee7264f31b)
+        ;
+
+        
+    
+    
+            marker_e352c4a9b5c882ef6e8495bc9b96012e.bindTooltip(
+                `<div>
+                     深圳 25.6°C
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_e352c4a9b5c882ef6e8495bc9b96012e.setIcon(icon_78a7a38652eb5d866f2c486f3618fdc2);
+            
+    
+            var marker_f5a61a3ba96f8bae60038497febc9af4 = L.marker(
+                [21.3226, 110.5829],
+                {
+}
+            ).addTo(marker_cluster_6eb1a9cc0a420db1219e9a970b822eca);
+        
+    
+            var icon_19b43601a0c36b4938a5babb09771e66 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "white",
+  "iconColor": "#F4A582",
+  "icon": "thermometer-half",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_395f21d091e17fa8486b01fb6e65325a = L.popup({
+  "maxWidth": 260,
+});
+
+        
+            
+                var html_b1d21e621ffa15ba6cf4a36730b3bd07 = $(`<div id="html_b1d21e621ffa15ba6cf4a36730b3bd07" style="width: 100.0%; height: 100.0%;"><div style='font-family: sans-serif; min-width: 160px;'><h4 style='margin:0 0 4px;'>中山</h4><b>温度：</b>25.9°C（体感 26.5°C）<br><b>湿度：</b>76%<br><b>风速：</b>1.94 m/s<br><b>天气：</b>多云<br><span style='color:#888;font-size:12px;'>更新于 2026-10-25 01:27:26.414143</span></div></div>`)[0];
+                popup_395f21d091e17fa8486b01fb6e65325a.setContent(html_b1d21e621ffa15ba6cf4a36730b3bd07);
+            
+        
+
+        marker_f5a61a3ba96f8bae60038497febc9af4.bindPopup(popup_395f21d091e17fa8486b01fb6e65325a)
+        ;
+
+        
+    
+    
+            marker_f5a61a3ba96f8bae60038497febc9af4.bindTooltip(
+                `<div>
+                     中山 25.9°C
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_f5a61a3ba96f8bae60038497febc9af4.setIcon(icon_19b43601a0c36b4938a5babb09771e66);
+            
+    
+            var marker_b6994174209e73323361b040d0c1823a = L.marker(
+                [22.2769, 113.5678],
+                {
+}
+            ).addTo(marker_cluster_6eb1a9cc0a420db1219e9a970b822eca);
+        
+    
+            var icon_f633aa6164ac664c8205912e5671c909 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "white",
+  "iconColor": "#F4A582",
+  "icon": "thermometer-half",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_cc679eac6a108e313ee58dea30af59d8 = L.popup({
+  "maxWidth": 260,
+});
+
+        
+            
+                var html_a819fade751f48a4aa9bdd84f5530676 = $(`<div id="html_a819fade751f48a4aa9bdd84f5530676" style="width: 100.0%; height: 100.0%;"><div style='font-family: sans-serif; min-width: 160px;'><h4 style='margin:0 0 4px;'>珠海</h4><b>温度：</b>25.4°C（体感 25.7°C）<br><b>湿度：</b>65%<br><b>风速：</b>2.3 m/s<br><b>天气：</b>多云<br><span style='color:#888;font-size:12px;'>更新于 2026-10-25 01:27:28.583428</span></div></div>`)[0];
+                popup_cc679eac6a108e313ee58dea30af59d8.setContent(html_a819fade751f48a4aa9bdd84f5530676);
+            
+        
+
+        marker_b6994174209e73323361b040d0c1823a.bindPopup(popup_cc679eac6a108e313ee58dea30af59d8)
+        ;
+
+        
+    
+    
+            marker_b6994174209e73323361b040d0c1823a.bindTooltip(
+                `<div>
+                     珠海 25.4°C
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_b6994174209e73323361b040d0c1823a.setIcon(icon_f633aa6164ac664c8205912e5671c909);
+            
+    
+            var marker_d35f5c9581faf0e15614b9cf65e1d185 = L.marker(
+                [22.5833, 113.0833],
+                {
+}
+            ).addTo(marker_cluster_6eb1a9cc0a420db1219e9a970b822eca);
+        
+    
+            var icon_4ed9813073bd7519ed0bfcb1800a7329 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "white",
+  "iconColor": "#F4A582",
+  "icon": "thermometer-half",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_ce35b2bdb8ae6ab3b7e306666e17194d = L.popup({
+  "maxWidth": 260,
+});
+
+        
+            
+                var html_3c90221370a8a6c977d23b98e6584601 = $(`<div id="html_3c90221370a8a6c977d23b98e6584601" style="width: 100.0%; height: 100.0%;"><div style='font-family: sans-serif; min-width: 160px;'><h4 style='margin:0 0 4px;'>江门</h4><b>温度：</b>24.9°C（体感 25.1°C）<br><b>湿度：</b>61%<br><b>风速：</b>2.56 m/s<br><b>天气：</b>多云<br><span style='color:#888;font-size:12px;'>更新于 2026-10-25 01:27:31.181967</span></div></div>`)[0];
+                popup_ce35b2bdb8ae6ab3b7e306666e17194d.setContent(html_3c90221370a8a6c977d23b98e6584601);
+            
+        
+
+        marker_d35f5c9581faf0e15614b9cf65e1d185.bindPopup(popup_ce35b2bdb8ae6ab3b7e306666e17194d)
+        ;
+
+        
+    
+    
+            marker_d35f5c9581faf0e15614b9cf65e1d185.bindTooltip(
+                `<div>
+                     江门 24.9°C
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_d35f5c9581faf0e15614b9cf65e1d185.setIcon(icon_4ed9813073bd7519ed0bfcb1800a7329);
+            
+    
+            var marker_f0118f5d5955b1f469b0a102eae01579 = L.marker(
+                [23.0833, 114.4],
+                {
+}
+            ).addTo(marker_cluster_6eb1a9cc0a420db1219e9a970b822eca);
+        
+    
+            var icon_e4b0db0a9a62271d3706fbaee677167e = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "white",
+  "iconColor": "#F4A582",
+  "icon": "thermometer-half",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_c456d1bbe8b03d39d4dcab00b1993354 = L.popup({
+  "maxWidth": 260,
+});
+
+        
+            
+                var html_eec3e1afca54788e3057e906295a7a2c = $(`<div id="html_eec3e1afca54788e3057e906295a7a2c" style="width: 100.0%; height: 100.0%;"><div style='font-family: sans-serif; min-width: 160px;'><h4 style='margin:0 0 4px;'>惠州</h4><b>温度：</b>25.0°C（体感 25.4°C）<br><b>湿度：</b>70%<br><b>风速：</b>2.48 m/s<br><b>天气：</b>阴，多云<br><span style='color:#888;font-size:12px;'>更新于 2026-10-25 01:27:33.411516</span></div></div>`)[0];
+                popup_c456d1bbe8b03d39d4dcab00b1993354.setContent(html_eec3e1afca54788e3057e906295a7a2c);
+            
+        
+
+        marker_f0118f5d5955b1f469b0a102eae01579.bindPopup(popup_c456d1bbe8b03d39d4dcab00b1993354)
+        ;
+
+        
+    
+    
+            marker_f0118f5d5955b1f469b0a102eae01579.bindTooltip(
+                `<div>
+                     惠州 25.0°C
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_f0118f5d5955b1f469b0a102eae01579.setIcon(icon_e4b0db0a9a62271d3706fbaee677167e);
+            
+    
+            var marker_1a153f328c63fb50a313b5cd1689e1aa = L.marker(
+                [23.0512, 112.4597],
+                {
+}
+            ).addTo(marker_cluster_6eb1a9cc0a420db1219e9a970b822eca);
+        
+    
+            var icon_f59048bac3e02a3d468132c65e9c4187 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "white",
+  "iconColor": "#92C5DE",
+  "icon": "thermometer-half",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_78787757fc380930d1d9ded17ebe30db = L.popup({
+  "maxWidth": 260,
+});
+
+        
+            
+                var html_5d6a0e1f26fd1c1a464d5fd3fff2dbc7 = $(`<div id="html_5d6a0e1f26fd1c1a464d5fd3fff2dbc7" style="width: 100.0%; height: 100.0%;"><div style='font-family: sans-serif; min-width: 160px;'><h4 style='margin:0 0 4px;'>肇庆</h4><b>温度：</b>23.7°C（体感 23.9°C）<br><b>湿度：</b>67%<br><b>风速：</b>0.99 m/s<br><b>天气：</b>多云<br><span style='color:#888;font-size:12px;'>更新于 2026-10-25 01:27:36.881218</span></div></div>`)[0];
+                popup_78787757fc380930d1d9ded17ebe30db.setContent(html_5d6a0e1f26fd1c1a464d5fd3fff2dbc7);
+            
+        
+
+        marker_1a153f328c63fb50a313b5cd1689e1aa.bindPopup(popup_78787757fc380930d1d9ded17ebe30db)
+        ;
+
+        
+    
+    
+            marker_1a153f328c63fb50a313b5cd1689e1aa.bindTooltip(
+                `<div>
+                     肇庆 23.7°C
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_1a153f328c63fb50a313b5cd1689e1aa.setIcon(icon_f59048bac3e02a3d468132c65e9c4187);
+            
+    
+            var marker_d6d0373568782f73de3e07dd32dfd417 = L.marker(
+                [22.2855, 114.1577],
+                {
+}
+            ).addTo(marker_cluster_6eb1a9cc0a420db1219e9a970b822eca);
+        
+    
+            var icon_09efbf3fe17ead8c010df3463b2691a3 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "white",
+  "iconColor": "#F4A582",
+  "icon": "thermometer-half",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_9b37473a448d57b979a0cc5cbd564a52 = L.popup({
+  "maxWidth": 260,
+});
+
+        
+            
+                var html_6a92bd5ed93b25ff8743fcb42d50769c = $(`<div id="html_6a92bd5ed93b25ff8743fcb42d50769c" style="width: 100.0%; height: 100.0%;"><div style='font-family: sans-serif; min-width: 160px;'><h4 style='margin:0 0 4px;'>香港</h4><b>温度：</b>26.6°C（体感 26.6°C）<br><b>湿度：</b>59%<br><b>风速：</b>3.56 m/s<br><b>天气：</b>阴，多云<br><span style='color:#888;font-size:12px;'>更新于 2026-10-25 01:27:40.151866</span></div></div>`)[0];
+                popup_9b37473a448d57b979a0cc5cbd564a52.setContent(html_6a92bd5ed93b25ff8743fcb42d50769c);
+            
+        
+
+        marker_d6d0373568782f73de3e07dd32dfd417.bindPopup(popup_9b37473a448d57b979a0cc5cbd564a52)
+        ;
+
+        
+    
+    
+            marker_d6d0373568782f73de3e07dd32dfd417.bindTooltip(
+                `<div>
+                     香港 26.6°C
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_d6d0373568782f73de3e07dd32dfd417.setIcon(icon_09efbf3fe17ead8c010df3463b2691a3);
+            
+    
+            var marker_904a32a3286479bcdc0d66df7f19e429 = L.marker(
+                [22.2006, 113.5461],
+                {
+}
+            ).addTo(marker_cluster_6eb1a9cc0a420db1219e9a970b822eca);
+        
+    
+            var icon_e3bcb13888777237cf4235ec85e387cd = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "white",
+  "iconColor": "#F4A582",
+  "icon": "thermometer-half",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_b1971347d6b294fa974b66b36419e53f = L.popup({
+  "maxWidth": 260,
+});
+
+        
+            
+                var html_2abfb1e00be43b998291198906f84f9c = $(`<div id="html_2abfb1e00be43b998291198906f84f9c" style="width: 100.0%; height: 100.0%;"><div style='font-family: sans-serif; min-width: 160px;'><h4 style='margin:0 0 4px;'>澳门</h4><b>温度：</b>25.7°C（体感 26.0°C）<br><b>湿度：</b>65%<br><b>风速：</b>2.68 m/s<br><b>天气：</b>多云<br><span style='color:#888;font-size:12px;'>更新于 2026-10-25 01:27:42.271713</span></div></div>`)[0];
+                popup_b1971347d6b294fa974b66b36419e53f.setContent(html_2abfb1e00be43b998291198906f84f9c);
+            
+        
+
+        marker_904a32a3286479bcdc0d66df7f19e429.bindPopup(popup_b1971347d6b294fa974b66b36419e53f)
+        ;
+
+        
+    
+    
+            marker_904a32a3286479bcdc0d66df7f19e429.bindTooltip(
+                `<div>
+                     澳门 25.7°C
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_904a32a3286479bcdc0d66df7f19e429.setIcon(icon_e3bcb13888777237cf4235ec85e387cd);
+            
+    
+            marker_cluster_6eb1a9cc0a420db1219e9a970b822eca.addTo(map_f92cabb2364b942c5911bc20267e4abd);
+        
+    
+            var marker_729ef4ab27386ccfd5998a3d80fecd43 = L.marker(
+                [23.1167, 113.25],
+                {
+}
+            ).addTo(map_f92cabb2364b942c5911bc20267e4abd);
+        
+    
+            var div_icon_be7887e911e4b5acc45d0a1672aa49e2 = L.divIcon({
+  "html": "\u003cdiv style=\u0027font-size:12px;font-weight:bold;color:#333;text-shadow:0 0 3px white;white-space:nowrap;\u0027\u003e24.5\u00b0C\u003c/div\u003e",
+  "iconSize": [60, 24],
+  "iconAnchor": [30, -14],
+  "className": "empty",
+});
+        
+    
+                marker_729ef4ab27386ccfd5998a3d80fecd43.setIcon(div_icon_be7887e911e4b5acc45d0a1672aa49e2);
+            
+    
+            var marker_0e8813bfbc6be0cce601df3e013631e0 = L.marker(
+                [23.0268, 113.1315],
+                {
+}
+            ).addTo(map_f92cabb2364b942c5911bc20267e4abd);
+        
+    
+            var div_icon_c214b87579dc50646ef00e8355efb1a0 = L.divIcon({
+  "html": "\u003cdiv style=\u0027font-size:12px;font-weight:bold;color:#333;text-shadow:0 0 3px white;white-space:nowrap;\u0027\u003e24.3\u00b0C\u003c/div\u003e",
+  "iconSize": [60, 24],
+  "iconAnchor": [30, -14],
+  "className": "empty",
+});
+        
+    
+                marker_0e8813bfbc6be0cce601df3e013631e0.setIcon(div_icon_c214b87579dc50646ef00e8355efb1a0);
+            
+    
+            var marker_01a22b6b327d553a04f41a0df3350f04 = L.marker(
+                [23.0489, 113.7447],
+                {
+}
+            ).addTo(map_f92cabb2364b942c5911bc20267e4abd);
+        
+    
+            var div_icon_21c37e7079f6db4247e7a0fbe86989f7 = L.divIcon({
+  "html": "\u003cdiv style=\u0027font-size:12px;font-weight:bold;color:#333;text-shadow:0 0 3px white;white-space:nowrap;\u0027\u003e25.3\u00b0C\u003c/div\u003e",
+  "iconSize": [60, 24],
+  "iconAnchor": [30, -14],
+  "className": "empty",
+});
+        
+    
+                marker_01a22b6b327d553a04f41a0df3350f04.setIcon(div_icon_21c37e7079f6db4247e7a0fbe86989f7);
+            
+    
+            var marker_74810709b5652f6ba388accf1b789b20 = L.marker(
+                [22.5455, 114.0683],
+                {
+}
+            ).addTo(map_f92cabb2364b942c5911bc20267e4abd);
+        
+    
+            var div_icon_777ab2d83221017462ef2ca74a8f736c = L.divIcon({
+  "html": "\u003cdiv style=\u0027font-size:12px;font-weight:bold;color:#333;text-shadow:0 0 3px white;white-space:nowrap;\u0027\u003e25.6\u00b0C\u003c/div\u003e",
+  "iconSize": [60, 24],
+  "iconAnchor": [30, -14],
+  "className": "empty",
+});
+        
+    
+                marker_74810709b5652f6ba388accf1b789b20.setIcon(div_icon_777ab2d83221017462ef2ca74a8f736c);
+            
+    
+            var marker_69de166500f6f8e29b946cc816c8c3c1 = L.marker(
+                [21.3226, 110.5829],
+                {
+}
+            ).addTo(map_f92cabb2364b942c5911bc20267e4abd);
+        
+    
+            var div_icon_bd2fa6eef8b40fd78a830e3d3a397d99 = L.divIcon({
+  "html": "\u003cdiv style=\u0027font-size:12px;font-weight:bold;color:#333;text-shadow:0 0 3px white;white-space:nowrap;\u0027\u003e25.9\u00b0C\u003c/div\u003e",
+  "iconSize": [60, 24],
+  "iconAnchor": [30, -14],
+  "className": "empty",
+});
+        
+    
+                marker_69de166500f6f8e29b946cc816c8c3c1.setIcon(div_icon_bd2fa6eef8b40fd78a830e3d3a397d99);
+            
+    
+            var marker_a5dbc89a1dc2f47b7f719395bbe682e9 = L.marker(
+                [22.2769, 113.5678],
+                {
+}
+            ).addTo(map_f92cabb2364b942c5911bc20267e4abd);
+        
+    
+            var div_icon_379563528cfe8019a26fe62b5b8e3a2b = L.divIcon({
+  "html": "\u003cdiv style=\u0027font-size:12px;font-weight:bold;color:#333;text-shadow:0 0 3px white;white-space:nowrap;\u0027\u003e25.4\u00b0C\u003c/div\u003e",
+  "iconSize": [60, 24],
+  "iconAnchor": [30, -14],
+  "className": "empty",
+});
+        
+    
+                marker_a5dbc89a1dc2f47b7f719395bbe682e9.setIcon(div_icon_379563528cfe8019a26fe62b5b8e3a2b);
+            
+    
+            var marker_8b5ffc4d568d6ed04a3ca5b62f2c5a71 = L.marker(
+                [22.5833, 113.0833],
+                {
+}
+            ).addTo(map_f92cabb2364b942c5911bc20267e4abd);
+        
+    
+            var div_icon_a0cd69b1b92a52d0ff25fe232128eea0 = L.divIcon({
+  "html": "\u003cdiv style=\u0027font-size:12px;font-weight:bold;color:#333;text-shadow:0 0 3px white;white-space:nowrap;\u0027\u003e24.9\u00b0C\u003c/div\u003e",
+  "iconSize": [60, 24],
+  "iconAnchor": [30, -14],
+  "className": "empty",
+});
+        
+    
+                marker_8b5ffc4d568d6ed04a3ca5b62f2c5a71.setIcon(div_icon_a0cd69b1b92a52d0ff25fe232128eea0);
+            
+    
+            var marker_c1aa980080f968248d185b7596b19690 = L.marker(
+                [23.0833, 114.4],
+                {
+}
+            ).addTo(map_f92cabb2364b942c5911bc20267e4abd);
+        
+    
+            var div_icon_63e082eb8622527e2392b1b1cebcda4f = L.divIcon({
+  "html": "\u003cdiv style=\u0027font-size:12px;font-weight:bold;color:#333;text-shadow:0 0 3px white;white-space:nowrap;\u0027\u003e25.0\u00b0C\u003c/div\u003e",
+  "iconSize": [60, 24],
+  "iconAnchor": [30, -14],
+  "className": "empty",
+});
+        
+    
+                marker_c1aa980080f968248d185b7596b19690.setIcon(div_icon_63e082eb8622527e2392b1b1cebcda4f);
+            
+    
+            var marker_964f04aa9a72c1154244d4a3cc1fc10e = L.marker(
+                [23.0512, 112.4597],
+                {
+}
+            ).addTo(map_f92cabb2364b942c5911bc20267e4abd);
+        
+    
+            var div_icon_040c06285994977143e7315ec76c29fb = L.divIcon({
+  "html": "\u003cdiv style=\u0027font-size:12px;font-weight:bold;color:#333;text-shadow:0 0 3px white;white-space:nowrap;\u0027\u003e23.7\u00b0C\u003c/div\u003e",
+  "iconSize": [60, 24],
+  "iconAnchor": [30, -14],
+  "className": "empty",
+});
+        
+    
+                marker_964f04aa9a72c1154244d4a3cc1fc10e.setIcon(div_icon_040c06285994977143e7315ec76c29fb);
+            
+    
+            var marker_ff86c3119f202df7bb365598e3f969a0 = L.marker(
+                [22.2855, 114.1577],
+                {
+}
+            ).addTo(map_f92cabb2364b942c5911bc20267e4abd);
+        
+    
+            var div_icon_ad9f827c725d760e53fc7a2ee85a96d8 = L.divIcon({
+  "html": "\u003cdiv style=\u0027font-size:12px;font-weight:bold;color:#333;text-shadow:0 0 3px white;white-space:nowrap;\u0027\u003e26.6\u00b0C\u003c/div\u003e",
+  "iconSize": [60, 24],
+  "iconAnchor": [30, -14],
+  "className": "empty",
+});
+        
+    
+                marker_ff86c3119f202df7bb365598e3f969a0.setIcon(div_icon_ad9f827c725d760e53fc7a2ee85a96d8);
+            
+    
+            var marker_2fcb1d658db303cfbde5bca8adbb68d5 = L.marker(
+                [22.2006, 113.5461],
+                {
+}
+            ).addTo(map_f92cabb2364b942c5911bc20267e4abd);
+        
+    
+            var div_icon_67839e2b5203a1a4e9fb6d3533ff5db1 = L.divIcon({
+  "html": "\u003cdiv style=\u0027font-size:12px;font-weight:bold;color:#333;text-shadow:0 0 3px white;white-space:nowrap;\u0027\u003e25.7\u00b0C\u003c/div\u003e",
+  "iconSize": [60, 24],
+  "iconAnchor": [30, -14],
+  "className": "empty",
+});
+        
+    
+                marker_2fcb1d658db303cfbde5bca8adbb68d5.setIcon(div_icon_67839e2b5203a1a4e9fb6d3533ff5db1);
+            
+</script>
+</html>
