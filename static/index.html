@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>大湾区实时气象站点</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+  <style>
+    html, body, #map { height: 100%; margin: 0; }
+    .wx-panel {
+      background: rgba(255, 255, 255, 0.96);
+      border-radius: 10px;
+      border-left: 4px solid #2166AC;
+      box-shadow: 0 1px 6px rgba(16, 24, 40, 0.18);
+      padding: 10px 12px;
+      max-width: 280px;
+      color: #1c2430;
+      pointer-events: auto;
+      font: 13px/1.45 "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    .wx-panel b { display: block; font-size: 14px; margin-bottom: 2px; }
+    .wx-panel-error { border-left-color: #D73027; }
+    .wx-panel-warn { border-left-color: #E6A23C; }
+    .wx-muted { color: #526070; font-size: 12px; margin-top: 2px; }
+    .wx-note { color: #8a5a12; font-size: 12px; margin-top: 4px; }
+    .wx-scale {
+      height: 8px;
+      margin-top: 8px;
+      border-radius: 99px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+    .wx-scale-labels {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 3px;
+      color: #526070;
+      font-size: 11px;
+    }
+    .wx-refresh {
+      display: block;
+      width: 100%;
+      margin-top: 8px;
+      border: 0;
+      border-radius: 8px;
+      background: #2166AC;
+      color: #fff;
+      font: 600 12px/1.2 "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      padding: 7px 8px;
+      cursor: pointer;
+    }
+    .wx-refresh:disabled { background: #8aa4c2; cursor: default; }
+    #wx-boot {
+      position: fixed;
+      left: 12px;
+      bottom: 18px;
+      z-index: 10000;
+    }
+    .leaflet-marker-icon.wx-label-icon,
+    .leaflet-marker-icon.wx-label-icon .wx-label {
+      background: none !important;
+      border: none !important;
+      pointer-events: none !important;
+    }
+    .wx-label {
+      color: #1c2430;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 16px;
+      text-align: center;
+      white-space: nowrap;
+      text-shadow: 0 0 3px #fff, 0 0 3px #fff, 0 1px 0 #fff;
+    }
+    .wx-popup .leaflet-popup-content-wrapper { border-radius: 12px; }
+    .wx-popup .leaflet-popup-content { margin: 12px 14px; }
+    .wx-card {
+      min-width: 210px;
+      color: #1c2430;
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    .wx-bar { height: 6px; border-radius: 99px; margin-bottom: 8px; }
+    .wx-city { font-size: 18px; font-weight: 700; line-height: 1.2; padding-right: 8px; }
+    .wx-sub { color: #526070; font-size: 12px; margin-top: 2px; }
+    .wx-temp { font-size: 28px; font-weight: 700; line-height: 1.1; margin-top: 6px; }
+    .wx-unit { margin-left: 2px; color: #526070; font-size: 14px; font-weight: 600; }
+    .wx-feels { color: #526070; font-size: 13px; margin: 2px 0 8px; }
+    .wx-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 4px 0;
+      border-top: 1px solid #eef0f3;
+      font-size: 13px;
+    }
+    .wx-row span { color: #526070; }
+    .wx-row b { color: #1c2430; font-weight: 600; text-align: right; }
+  </style>
+</head>
+<body>
+  <div id="wx-boot" class="wx-panel">正在加载气象站点…</div>
+  <div id="map"></div>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <script>
+    const HUE_COLD = 212;
+    const HUE_HOT = 4;
+    const COMPASS = ["北", "东北", "东", "东南", "南", "西南", "西", "西北"];
+    const STREET = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}";
+    const IMAGE = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+
+    const markers = new Map();
+    let cluster = null;
+    let labels = null;
+    let map = null;
+    let fitted = false;
+    let openCity = null;
+    let deadline = 0;
+    let manualUntil = 0;
+    let refreshing = false;
+    let pollTimer = null;
+    let refreshTimer = null;
+    let posting = false;
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (ch) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[ch]));
+    }
+
+    function num(value) {
+      if (value === null || value === undefined || value === "") return null;
+      const number = Number(value);
+      return Number.isFinite(number) ? number : null;
+    }
+
+    function fmt(value, digits) {
+      const number = num(value);
+      return number === null ? null : number.toFixed(digits);
+    }
+
+    function hslToHex(hue, saturation, lightness) {
+      hue = ((hue % 360) + 360) % 360;
+      saturation /= 100;
+      lightness /= 100;
+      const chroma = (1 - Math.abs(2 * lightness - 1)) * saturation;
+      const channel = chroma * (1 - Math.abs((hue / 60) % 2 - 1));
+      let red = 0;
+      let green = 0;
+      let blue = 0;
+      if (hue < 60) [red, green, blue] = [chroma, channel, 0];
+      else if (hue < 120) [red, green, blue] = [channel, chroma, 0];
+      else if (hue < 180) [red, green, blue] = [0, chroma, channel];
+      else if (hue < 240) [red, green, blue] = [0, channel, chroma];
+      else if (hue < 300) [red, green, blue] = [channel, 0, chroma];
+      else [red, green, blue] = [chroma, 0, channel];
+      const match = lightness - chroma / 2;
+      const rgb = [red, green, blue].map((value) => Math.round((value + match) * 255));
+      return "#" + rgb.map((value) => value.toString(16).padStart(2, "0")).join("").toUpperCase();
+    }
+
+    function colorAt(fraction) {
+      const clamped = Math.min(1, Math.max(0, fraction));
+      const hue = HUE_COLD + (HUE_HOT - HUE_COLD) * clamped;
+      const lightness = 42 + 12 * Math.sin(Math.PI * clamped);
+      return hslToHex(hue, 76, lightness);
+    }
+
+    function tempColor(temp, tmin, tmax) {
+      const span = tmax - tmin;
+      const fraction = span < 0.3 ? 0.5 : (temp - tmin) / span;
+      return colorAt(fraction);
+    }
+
+    function cityKey(city) {
+      return city.city_cn || city.city || "";
+    }
+
+    function windText(city) {
+      const speed = fmt(city.wind_speed, 2);
+      const degrees = num(city.wind_deg);
+      let direction = null;
+      if (degrees !== null) {
+        const index = Math.floor((degrees % 360 + 22.5) / 45) % 8;
+        direction = COMPASS[(index + 8) % 8] + "风";
+      }
+      const degText = degrees === null ? null : String(Math.round(degrees));
+      if (speed && direction && degText) return `${speed} m/s · ${direction}（${degText}°）`;
+      if (speed && direction) return `${speed} m/s · ${direction}`;
+      if (speed) return `${speed} m/s`;
+      return direction;
+    }
+
+    function formatTime(value) {
+      if (!value) return null;
+      const text = String(value).trim();
+      const match = text.match(/^(\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2})/);
+      return match ? match[1].replace("T", " ") : text;
+    }
+
+    function formatVisibility(value) {
+      const meters = num(value);
+      if (meters === null) return null;
+      if (meters >= 1000) {
+        const km = meters / 1000;
+        return `${km >= 10 ? km.toFixed(0) : km.toFixed(1)} km`;
+      }
+      return `${meters.toFixed(0)} m`;
+    }
+
+    function formatCoord(lat, lon) {
+      const ns = lat >= 0 ? "N" : "S";
+      const ew = lon >= 0 ? "E" : "W";
+      return `${Math.abs(lat).toFixed(4)}°${ns}, ${Math.abs(lon).toFixed(4)}°${ew}`;
+    }
+
+    function popupHtml(city, color) {
+      const name = city.city_cn || city.city || "未命名";
+      const english = city.city && city.city !== name ? city.city : "";
+      const weather = city.weather || "";
+      const subtitle = [english, weather].filter(Boolean).join(" · ");
+      const temp = fmt(city.temp, 1);
+      const feels = fmt(city.feels_like, 1);
+      const humidity = fmt(city.humidity, 0);
+      const gust = fmt(city.wind_gust, 2);
+      const pressure = fmt(city.pressure, 0);
+      const rain = fmt(city.rain_1h, 1);
+      const snow = fmt(city.snow_1h, 1);
+      const rows = [
+        ["湿度", humidity ? `${humidity}%` : null],
+        ["风速", windText(city)],
+        ["阵风", gust ? `${gust} m/s` : null],
+        ["降水", rain ? `${rain} mm/h` : null],
+        ["降雪", snow ? `${snow} mm/h` : null],
+        ["气压", pressure ? `${pressure} hPa` : null],
+        ["能见度", formatVisibility(city.visibility)],
+        ["经纬度", formatCoord(Number(city.lat), Number(city.lon))],
+        ["更新时间", formatTime(city.timestamp)]
+      ];
+      const body = rows.filter((row) => row[1]).map(([label, value]) => (
+        `<div class="wx-row"><span>${escapeHtml(label)}</span><b>${escapeHtml(value)}</b></div>`
+      )).join("");
+      const safeColor = /^#[0-9A-F]{6}$/.test(color) ? color : "#2166AC";
+      return (
+        `<div class="wx-card">` +
+        `<div class="wx-bar" style="background:${safeColor}"></div>` +
+        `<div class="wx-city">${escapeHtml(name)}</div>` +
+        (subtitle ? `<div class="wx-sub">${escapeHtml(subtitle)}</div>` : "") +
+        `<div class="wx-temp">${escapeHtml(temp || "—")}<span class="wx-unit">°C</span></div>` +
+        (feels ? `<div class="wx-feels">体感 ${escapeHtml(feels)}°C</div>` : "") +
+        `<div class="wx-rows">${body}</div></div>`
+      );
+    }
+
+    function labelIcon(temp) {
+      return L.divIcon({
+        className: "wx-label-icon",
+        iconSize: [76, 16],
+        iconAnchor: [38, 32],
+        html: `<div class="wx-label">${Number(temp).toFixed(1)}°C</div>`
+      });
+    }
+
+    function formatRemain(seconds) {
+      const whole = Math.max(0, seconds);
+      const minutes = Math.floor(whole / 60);
+      const rest = whole % 60;
+      if (minutes <= 0) return `${rest} 秒`;
+      return `${minutes} 分 ${String(rest).padStart(2, "0")} 秒`;
+    }
+
+    function setPanelKind(kind) {
+      const panel = document.getElementById("wx-status");
+      panel.classList.add("wx-panel");
+      panel.classList.remove("wx-panel-error", "wx-panel-warn");
+      if (kind === "error" || kind === "warn") panel.classList.add("wx-panel-" + kind);
+    }
+
+    function render(data) {
+      const cities = (data.cities || []).filter((city) => (
+        num(city.temp) !== null && num(city.lat) !== null && num(city.lon) !== null
+      ));
+      const temps = cities.map((city) => Number(city.temp));
+      const tmin = temps.length ? Math.min(...temps) : null;
+      const tmax = temps.length ? Math.max(...temps) : null;
+      const keep = new Set();
+
+      cities.forEach((city) => {
+        const key = cityKey(city);
+        if (!key) return;
+        keep.add(key);
+        const color = tempColor(Number(city.temp), tmin, tmax);
+        const html = popupHtml(city, color);
+        const latlng = [Number(city.lat), Number(city.lon)];
+        const tip = `${city.city_cn || city.city}  ${Number(city.temp).toFixed(1)}°C` +
+          (city.weather ? `  ${city.weather}` : "");
+        let entry = markers.get(key);
+        if (!entry) {
+          const circle = L.circleMarker(latlng, {
+            radius: 12,
+            color: "#243044",
+            weight: 1.5,
+            fillColor: color,
+            fillOpacity: 0.95
+          });
+          circle.bindPopup(html, { maxWidth: 320, minWidth: 230, className: "wx-popup", autoPan: true });
+          circle.bindTooltip(tip, { sticky: true });
+          circle.on("popupopen", () => { openCity = key; });
+          circle.on("popupclose", () => { if (openCity === key) openCity = null; });
+          circle.on("mouseover", () => circle.bringToFront());
+          circle.addTo(cluster);
+          const label = L.marker(latlng, { interactive: false, keyboard: false, icon: labelIcon(city.temp) });
+          label.addTo(labels);
+          entry = { circle, label, html };
+          markers.set(key, entry);
+        } else {
+          entry.circle.setLatLng(latlng);
+          entry.circle.setStyle({ fillColor: color });
+          if (entry.html !== html) {
+            entry.circle.setPopupContent(html);
+            entry.html = html;
+          }
+          if (entry.circle.getTooltip()) entry.circle.setTooltipContent(tip);
+          entry.label.setLatLng(latlng);
+          entry.label.setIcon(labelIcon(city.temp));
+        }
+      });
+
+      for (const [key, entry] of markers) {
+        if (keep.has(key)) continue;
+        cluster.removeLayer(entry.circle);
+        labels.removeLayer(entry.label);
+        markers.delete(key);
+        if (openCity === key) openCity = null;
+      }
+      cluster.refreshClusters();
+
+      if (!fitted && cities.length) {
+        const lats = cities.map((city) => Number(city.lat));
+        const lons = cities.map((city) => Number(city.lon));
+        map.fitBounds([[Math.min(...lats), Math.min(...lons)], [Math.max(...lats), Math.max(...lons)]], {
+          paddingTopLeft: [28, 56],
+          paddingBottomRight: [180, 150],
+          maxZoom: 9,
+          animate: false
+        });
+        fitted = true;
+      }
+
+      const panel = document.getElementById("wx-status");
+      const failed = data.failed || [];
+      let kind = "ok";
+      let title = `已加载 ${cities.length} 个城市`;
+      if (!cities.length && data.refreshing) title = "正在加载气象站点…";
+      else if (!cities.length) {
+        kind = "error";
+        title = "天气数据没有加载成功";
+      } else if (data.stale) {
+        kind = "warn";
+        title = `已加载 ${cities.length} 个城市（数据过期）`;
+      } else if (data.throttled || data.warning || failed.length) kind = "warn";
+      setPanelKind(kind);
+      document.getElementById("wx-title").textContent = title;
+      document.getElementById("wx-line-time").textContent = data.fetched_at ? `拉取于 ${data.fetched_at}` : "";
+      document.getElementById("wx-line-hint").textContent = cities.length ? "点击标记查看温度、湿度、风速" : "";
+      const scaleText = document.getElementById("wx-line-scale");
+      const bar = document.getElementById("wx-scale");
+      const ends = document.getElementById("wx-scale-labels");
+      if (tmin === null) {
+        scaleText.textContent = "";
+        bar.hidden = true;
+        ends.hidden = true;
+      } else {
+        const span = tmax - tmin;
+        scaleText.textContent = span < 0.3
+          ? "各城温度几乎相同，颜色会很接近"
+          : `冷蓝到热红，按本次温差 ${span.toFixed(1)}°C 平滑过渡`;
+        const stops = [0, 0.25, 0.5, 0.75, 1].map((stop) => `${colorAt(stop)} ${(stop * 100).toFixed(0)}%`);
+        bar.hidden = false;
+        bar.style.background = `linear-gradient(90deg, ${stops.join(", ")})`;
+        ends.hidden = false;
+        ends.textContent = "";
+        const cold = document.createElement("span");
+        cold.textContent = `${tmin.toFixed(1)}°C 冷`;
+        const hot = document.createElement("span");
+        hot.textContent = `热 ${tmax.toFixed(1)}°C`;
+        ends.append(cold, hot);
+      }
+      const note = [data.message, data.warning].filter(Boolean).join(" ");
+      document.getElementById("wx-line-note").textContent = note;
+      panel.dataset.fetched = data.fetched_at || "";
+      panel.dataset.count = String(cities.length);
+      panel.dataset.refreshing = data.refreshing ? "1" : "0";
+      panel.dataset.stale = data.stale ? "1" : "0";
+      panel.dataset.throttled = data.throttled ? "1" : "0";
+      panel.dataset.open = openCity || "";
+      schedule(data);
+      tick();
+    }
+
+    function schedule(data) {
+      clearTimeout(pollTimer);
+      clearTimeout(refreshTimer);
+      refreshing = Boolean(data.refreshing);
+      manualUntil = Date.now() + Math.max(0, data.seconds_until_manual || 0) * 1000;
+      const secondsLeft = Number.isFinite(data.seconds_until_refresh)
+        ? data.seconds_until_refresh
+        : (data.refresh_seconds || 600);
+      const wait = Math.max(1, secondsLeft);
+      deadline = Date.now() + (refreshing ? 0 : wait * 1000);
+      if (refreshing) {
+        pollTimer = setTimeout(() => load(false), 2000);
+      } else {
+        refreshTimer = setTimeout(() => load(false), wait * 1000);
+      }
+    }
+
+    function tick() {
+      const next = document.getElementById("wx-line-next");
+      const button = document.getElementById("wx-refresh");
+      if (!next || !button) return;
+      if (refreshing) next.textContent = "正在向天气接口更新，地图仍显示上一份数据。";
+      else if ((document.getElementById("wx-status").dataset.count || "0") !== "0") {
+        const left = Math.max(0, Math.round((deadline - Date.now()) / 1000));
+        next.textContent = left > 0 ? `${formatRemain(left)}后自动刷新` : "即将自动刷新";
+      } else next.textContent = "";
+      if (posting || refreshing) {
+        button.disabled = true;
+        button.textContent = "正在刷新…";
+        return;
+      }
+      const manual = Math.max(0, Math.ceil((manualUntil - Date.now()) / 1000));
+      if (manual > 0) {
+        button.disabled = true;
+        button.textContent = `立即刷新（${manual} 秒后可用）`;
+      } else {
+        button.disabled = false;
+        button.textContent = "立即刷新";
+      }
+    }
+
+    async function load(manual) {
+      if (manual) posting = true;
+      tick();
+      try {
+        const response = await fetch(manual ? "/api/refresh" : "/api/weather", {
+          method: manual ? "POST" : "GET",
+          cache: "no-store"
+        });
+        if (!response.ok) throw new Error(`天气接口没有响应（HTTP ${response.status}）`);
+        const data = await response.json();
+        render(data);
+      } catch (error) {
+        const boot = document.getElementById("wx-boot");
+        const title = document.getElementById("wx-title");
+        const text = error && error.message ? error.message : "天气数据没有加载成功";
+        if (title) {
+          setPanelKind("error");
+          title.textContent = "天气数据没有加载成功";
+          document.getElementById("wx-line-note").textContent = text;
+        } else if (boot) {
+          boot.className = "wx-panel wx-panel-error";
+          boot.textContent = text;
+        }
+        pollTimer = setTimeout(() => load(false), 5000);
+      } finally {
+        posting = false;
+        tick();
+      }
+    }
+
+    function bootMap() {
+      if (typeof L === "undefined" || typeof L.markerClusterGroup !== "function") {
+        const boot = document.getElementById("wx-boot");
+        boot.className = "wx-panel wx-panel-error";
+        boot.textContent = "地图库没有载入。请检查网络后刷新。";
+        return;
+      }
+      map = L.map("map", { zoomControl: true }).setView([22.9, 113.5], 8);
+      const streets = L.tileLayer(STREET, { attribution: "Tiles &copy; Esri", maxZoom: 18 });
+      const satellite = L.tileLayer(IMAGE, { attribution: "Tiles &copy; Esri", maxZoom: 18 });
+      streets.addTo(map);
+      cluster = L.markerClusterGroup({
+        disableClusteringAtZoom: 7,
+        maxClusterRadius: 32,
+        spiderfyOnMaxZoom: true,
+        showCoverageOnHover: false
+      });
+      labels = L.layerGroup();
+      cluster.addTo(map);
+      labels.addTo(map);
+      L.control.layers(
+        { "街道图": streets, "卫星影像": satellite },
+        { "城市站点": cluster, "温度标签": labels },
+        { position: "topright", collapsed: false }
+      ).addTo(map);
+
+      const Status = L.Control.extend({
+        onAdd() {
+          const div = L.DomUtil.create("div", "wx-panel");
+          div.id = "wx-status";
+          div.innerHTML = (
+            "<b id='wx-title'>正在加载气象站点…</b>" +
+            "<div class='wx-muted' id='wx-line-time'></div>" +
+            "<div class='wx-muted' id='wx-line-next'></div>" +
+            "<div class='wx-muted' id='wx-line-hint'></div>" +
+            "<div class='wx-muted' id='wx-line-scale'></div>" +
+            "<div class='wx-scale' id='wx-scale' hidden></div>" +
+            "<div class='wx-scale-labels' id='wx-scale-labels' hidden></div>" +
+            "<div class='wx-note' id='wx-line-note'></div>" +
+            "<button class='wx-refresh' id='wx-refresh' type='button'>立即刷新</button>"
+          );
+          L.DomEvent.disableClickPropagation(div);
+          L.DomEvent.disableScrollPropagation(div);
+          return div;
+        }
+      });
+      map.addControl(new Status({ position: "bottomleft" }));
+      const boot = document.getElementById("wx-boot");
+      if (boot) boot.remove();
+      document.getElementById("wx-refresh").addEventListener("click", () => load(true));
+      setInterval(tick, 1000);
+      load(false);
+    }
+
+    window.onerror = function (msg) {
+      const boot = document.getElementById("wx-boot");
+      if (boot) {
+        boot.className = "wx-panel wx-panel-error";
+        boot.textContent = "地图脚本出错：" + msg;
+      }
+      return false;
+    };
+
+    bootMap();
+  </script>
+</body>
+</html>

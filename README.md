@@ -1,13 +1,13 @@
 # mini-01-weather-map ｜ 大湾区实时气象站点地图
 
-基于 OpenWeatherMap API 与 Folium 的交互式实时气象地图：一键拉取大湾区 11 个城市（广州 / 佛山 / 东莞 / 深圳 / 中山 / 珠海 / 江门 / 惠州 / 肇庆 / 香港 / 澳门）的实时天气数据，生成可交互的 HTML 地图——标记聚合、温度分档配色、悬浮温度标签、点击弹窗查看详情，并支持街道图 / 卫星影像图层切换。
+基于 OpenWeatherMap 的大湾区气象地图，覆盖广州 / 佛山 / 东莞 / 深圳 / 中山 / 珠海 / 江门 / 惠州 / 肇庆 / 香港 / 澳门。运行 `python app.py` 后打开页面即可查看：标记、温度着色、图例和弹窗会就地更新。也可以导出一份不会自动刷新的静态 HTML。
 
 ![大湾区实时气象地图](docs/screenshot.png)
 
 ## 功能特性
 
-- **11 城实时数据**：温度 / 体感 / 湿度 / 风速 / 天气描述 / 经纬度，一次拉取全量解析
-- **交互地图**：MarkerCluster 聚合标记 + 温度分档配色（冷蓝 → 暖红）+ 站点温度数字标签
+- **11 城实时数据**：温度 / 体感 / 湿度 / 风速 / 天气描述 / 经纬度。打开页面即有数据，默认约每 10 分钟自动刷新，也可手动刷新
+- **交互地图**：MarkerCluster 聚合标记 + 按本次温差从冷蓝到热红连续配色 + 站点温度数字标签
 - **双图层切换**：Esri WorldStreetMap 街道图 + Esri WorldImagery 卫星影像，右上角图层控件自由切换
 - **限流保护**：请求间隔 1.2 秒，适配免费额度（60 次/分钟）并留足余量
 - **异常容错**：单城市拉取失败不影响整体，结束汇总失败清单可单独重跑
@@ -34,19 +34,26 @@ pip install -r requirements.txt
 cp .env.example .env         # Windows 用 copy .env.example .env
 # 编辑 .env，填入 API_KEY=你的Key
 
-# 4. 拉取数据并生成地图
-python fetch_weather.py      # 拉取 11 城数据 → weather_data.csv
-python make_map.py           # 生成交互地图 → weather_map.html
+# 4. 启动本地服务（页面和数据接口同源，Key 只留在 .env）
+python app.py
+# 浏览器打开 http://127.0.0.1:8765
 ```
 
-用浏览器打开 `weather_map.html` 即可查看。
+可选：导出一份静态快照（打开后不会自己更新）。
+
+```bash
+python fetch_weather.py      # 拉取 11 城数据 → weather_data.csv
+python make_map.py           # 生成静态地图 → weather_map.html
+```
 
 ## 项目结构
 
 ```
 mini-01-weather-map/
-├── fetch_weather.py    # 数据拉取与解析（API → DataFrame → CSV）
-├── make_map.py         # 地图渲染（CSV → Folium 交互地图）
+├── app.py              # 本地服务：页面、缓存和定时刷新
+├── static/index.html   # 会就地更新的地图页面
+├── fetch_weather.py    # 数据拉取与解析（app.py 和一次性脚本共用）
+├── make_map.py         # 一次性静态地图（CSV → weather_map.html）
 ├── weather_data.csv    # 最近一次拉取的数据（运行时生成）
 ├── weather_map.html    # 交互地图成品（运行时生成）
 ├── .env.example        # API Key 配置模板
@@ -62,8 +69,8 @@ mini-01-weather-map/
 
 ## 局限说明
 
-- 数据为拉取时刻的快照，非持续刷新；如需实时更新可自行加定时任务
-- 免费额度为 60 次/分钟、1,000,000 次/月，本项目单次运行仅 11 次调用
+- 当前天气大约每 10 分钟向接口拉一轮（`.env` 里的 `WEATHER_REFRESH_SECONDS`，默认 600）。手动刷新最短间隔 30 秒（`WEATHER_REFRESH_COOLDOWN`）。`weather_map.html` 仍是静态快照
+- 免费额度为 60 次/分钟、1,000,000 次/月。默认节奏下每小时大约 66 次调用；30 秒内不会把 11 个城市再打一遍
 - 本项目为个人学习作品（空间数据可视化练习），非商业服务
 
 ## License
